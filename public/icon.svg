@@ -3,35 +3,68 @@
     <clipPath id="cl"><rect width="512" height="512" rx="112"/></clipPath>
     <linearGradient id="vig" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#000" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#000" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#0369a1"/>
     </linearGradient>
   </defs>
 
-  <!-- French tricolor background -->
+  <!-- Background: sky gradient -->
   <g clip-path="url(#cl)">
-    <rect width="512" height="512" fill="#002395"/>
-    <rect x="171" y="0" width="170" height="512" fill="#EFEFEF"/>
-    <rect x="341" y="0" width="171" height="512" fill="#ED2939"/>
-    <rect width="512" height="512" fill="rgba(4,10,42,0.38)"/>
-    <rect width="512" height="512" fill="url(#vig)"/>
+    <rect width="512" height="512" fill="#1e40af"/>
+    <rect y="0" width="512" height="512" fill="url(#vig)" opacity="0.5"/>
+    <!-- Sky -->
+    <rect width="512" height="340" fill="#1d4ed8"/>
+    <!-- Sea -->
+    <rect y="340" width="512" height="172" fill="url(#sea)"/>
+    <!-- Sand -->
+    <rect y="410" width="512" height="102" fill="#fde68a"/>
+    <!-- Wave highlight -->
+    <ellipse cx="256" cy="410" rx="280" ry="12" fill="#38bdf8" opacity="0.5"/>
   </g>
 
-  <!-- Funnel cap -->
-  <rect x="155" y="92" width="70" height="20" rx="6" fill="white" opacity="0.96"/>
-  <!-- Funnel stack -->
-  <rect x="168" y="112" width="44" height="80" rx="10" fill="white" opacity="0.96"/>
-  <!-- Green funnel band -->
-  <rect x="168" y="150" width="44" height="18" rx="4" fill="#16a34a"/>
+  <!--
+    Umbrella canopy: semicircle, centre (256, 270), radius 170
+    Points every 30°:
+      P0 (180°) = (86, 270)
+      P1 (150°) = (109, 185)
+      P2 (120°) = (171, 123)
+      P3  (90°) = (256, 100)
+      P4  (60°) = (341, 123)
+      P5  (30°) = (403, 185)
+      P6   (0°) = (426, 270)
+    Arc sweep-flag=0 (counterclockwise in SVG = through the top)
+  -->
 
-  <!-- Superstructure — one solid block -->
-  <rect x="50" y="194" width="400" height="118" rx="10" fill="white" opacity="0.96"/>
+  <!-- 6 wedges: blue / white / red / blue / white / red -->
+  <path d="M256,270 L86,270  A170,170 0 0,0 109,185 Z" fill="#1d4ed8"/>
+  <path d="M256,270 L109,185 A170,170 0 0,0 171,123 Z" fill="#f5f5f5"/>
+  <path d="M256,270 L171,123 A170,170 0 0,0 256,100 Z" fill="#ef4444"/>
+  <path d="M256,270 L256,100 A170,170 0 0,0 341,123 Z" fill="#1d4ed8"/>
+  <path d="M256,270 L341,123 A170,170 0 0,0 403,185 Z" fill="#f5f5f5"/>
+  <path d="M256,270 L403,185 A170,170 0 0,0 426,270 Z" fill="#ef4444"/>
 
-  <!-- Hull (white, bow pointing right) -->
-  <path d="M 48,310 L 48,434 L 446,434 L 482,372 L 446,310 Z" fill="white" opacity="0.96"/>
+  <!-- Canopy arc outline and base line -->
+  <path d="M86,270 A170,170 0 0,0 426,270" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="4"/>
+  <line x1="86" y1="270" x2="426" y2="270" stroke="rgba(255,255,255,0.35)" stroke-width="3"/>
 
-  <!-- Green hull stripe -->
-  <path d="M 48,310 L 48,356 L 469,356 L 446,310 Z" fill="#16a34a"/>
+  <!-- Rib lines -->
+  <line x1="256" y1="270" x2="86"  y2="270" stroke="rgba(255,255,255,0.45)" stroke-width="2.5"/>
+  <line x1="256" y1="270" x2="109" y2="185" stroke="rgba(255,255,255,0.45)" stroke-width="2.5"/>
+  <line x1="256" y1="270" x2="171" y2="123" stroke="rgba(255,255,255,0.45)" stroke-width="2.5"/>
+  <line x1="256" y1="270" x2="256" y2="100" stroke="rgba(255,255,255,0.45)" stroke-width="2.5"/>
+  <line x1="256" y1="270" x2="341" y2="123" stroke="rgba(255,255,255,0.45)" stroke-width="2.5"/>
+  <line x1="256" y1="270" x2="403" y2="185" stroke="rgba(255,255,255,0.45)" stroke-width="2.5"/>
+  <line x1="256" y1="270" x2="426" y2="270" stroke="rgba(255,255,255,0.45)" stroke-width="2.5"/>
 
-  <!-- Waterline shimmer -->
-  <rect x="48" y="430" width="434" height="6" rx="3" fill="rgba(255,255,255,0.28)"/>
+  <!-- Centre hub -->
+  <circle cx="256" cy="270" r="15" fill="white" opacity="0.95"/>
+
+  <!-- Pole (angled into sand) -->
+  <line x1="256" y1="270" x2="300" y2="432" stroke="white" stroke-width="13" stroke-linecap="round" opacity="0.95"/>
+
+  <!-- Pole base in sand -->
+  <ellipse cx="300" cy="430" rx="18" ry="6" fill="#fbbf24" opacity="0.7"/>
 </svg>
