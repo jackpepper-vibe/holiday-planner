@@ -1,5 +1,5 @@
 import './style.css';
-import { TRIP, TRIP_NAME, LOCATION_ADDRESSES, locStyle, type Day } from './data.js';
+import { TRIP, LOCATION_ADDRESSES, locStyle, type Day } from './data.js';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -41,55 +41,6 @@ function buildLocGroups(): LocGroup[] {
 function mapsUrl(name: string): string {
   const addr = LOCATION_ADDRESSES[name] ?? name + ', France';
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}&travelmode=driving`;
-}
-
-// ── Hero ─────────────────────────────────────────────────────────────────────
-
-function buildHero(today: string): string {
-  const first = TRIP[0].date;
-  const last  = TRIP[TRIP.length - 1].date;
-
-  if (today < first) {
-    const ms   = new Date(first+'T00:00:00').getTime() - new Date(today+'T00:00:00').getTime();
-    const days = Math.ceil(ms / 86_400_000);
-    return `
-      <div class="hero">
-        <div class="hero-orb"></div>
-        <div class="hero-content">
-          <div class="hero-eyebrow">countdown</div>
-          <div class="hero-num">${days}</div>
-          <div class="hero-sub">days to go</div>
-          <div class="hero-caption">Departing ${fmt(first)}</div>
-        </div>
-      </div>`;
-  }
-
-  if (today > last) {
-    return `
-      <div class="hero hero--done">
-        <div class="hero-orb"></div>
-        <div class="hero-content">
-          <div class="hero-title">What a trip!</div>
-          <div class="hero-caption">${fmt(first)} – ${fmt(last)}</div>
-        </div>
-      </div>`;
-  }
-
-  const idx = TRIP.findIndex(d => d.date === today);
-  const day = TRIP[idx];
-  const loc = day.overnight ?? (day.tbd ? 'Nothing booked yet' : 'Travel day');
-  const col = day.overnight ? locStyle(day.overnight).text : '#94a3b8';
-  const glow = day.overnight ? locStyle(day.overnight).border : '#475569';
-
-  return `
-    <div class="hero" style="--loc-glow:${glow}40">
-      <div class="hero-orb" style="background:radial-gradient(ellipse,${glow}30,transparent 70%)"></div>
-      <div class="hero-content">
-        <div class="hero-eyebrow">Day ${idx+1} of ${TRIP.length} &middot; ${fmt(today)}</div>
-        <div class="hero-loc" style="color:${col};text-shadow:0 0 40px ${glow}80">${loc}</div>
-        <div class="hero-caption">Tonight's stop</div>
-      </div>
-    </div>`;
 }
 
 // ── Itinerary row ─────────────────────────────────────────────────────────────
@@ -190,14 +141,9 @@ function render(): void {
   document.getElementById('app')!.innerHTML = `
     <div class="shell">
       <header class="top-bar">
-        <div class="logo">
-          <span class="logo-main">${TRIP_NAME}</span>
-          <div class="tricolor"><span class="tc-b"></span><span class="tc-w"></span><span class="tc-r"></span></div>
-        </div>
-        <button class="btn btn--share" id="share-btn">Share</button>
+        <img src="/header2.png" alt="France 2026" class="header-img" />
       </header>
       <main class="content">
-        ${buildHero(today)}
         <section class="section">
           <div class="section-title">Itinerary</div>
           <div class="list">
@@ -219,19 +165,6 @@ function render(): void {
 // ── Events ────────────────────────────────────────────────────────────────────
 
 function wireEvents(): void {
-
-  document.getElementById('share-btn')!.addEventListener('click', () => {
-    void (async () => {
-      if (navigator.share) {
-        await navigator.share({ title: TRIP_NAME, url: location.href });
-      } else {
-        await navigator.clipboard.writeText(location.href);
-        const btn = document.getElementById('share-btn')!;
-        btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = 'Share'; }, 2000);
-      }
-    })();
-  });
 
   document.querySelectorAll<HTMLButtonElement>('[data-panel]').forEach(btn => {
     btn.addEventListener('click', () => {

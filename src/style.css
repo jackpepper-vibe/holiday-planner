@@ -43,44 +43,20 @@ body::before {
 
 /* ── Top bar ─────────────────────────────────────────── */
 .top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: calc(var(--top-h) + var(--safe-t));
-  padding: var(--safe-t) 20px 0;
-  background: rgba(7, 11, 24, 0.88);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   position: sticky;
   top: 0;
   z-index: 20;
+  padding-top: var(--safe-t);
+  background: #000;
+  line-height: 0;
 }
 
-.logo { display: flex; flex-direction: column; gap: 5px; }
-
-.logo-main {
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: -0.3px;
-  background: linear-gradient(135deg, #e2e8f0, #94a3b8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.header-img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
 }
-
-.tricolor {
-  display: flex;
-  height: 2px;
-  width: 38px;
-  gap: 1px;
-  border-radius: 2px;
-  overflow: hidden;
-}
-.tc-b { flex: 1; background: #3b82f6; }
-.tc-w { flex: 1; background: rgba(255,255,255,0.8); }
-.tc-r { flex: 1; background: #ef4444; }
 
 /* ── Content ─────────────────────────────────────────── */
 .content {
@@ -91,109 +67,6 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 28px;
-}
-
-/* ── Hero ─────────────────────────────────────────────── */
-.hero {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(145deg, #1a1040 0%, #0e1535 40%, #091230 100%);
-  border: 1px solid rgba(99,102,241,0.2);
-  border-radius: 24px;
-  padding: 40px 24px 36px;
-  text-align: center;
-  box-shadow:
-    0 0 60px rgba(99,102,241,0.08),
-    0 20px 60px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.06);
-}
-
-.hero--done {
-  background: linear-gradient(145deg, #0a2518, #091a10, #050e09);
-  border-color: rgba(74,222,128,0.2);
-  box-shadow: 0 0 60px rgba(74,222,128,0.08), 0 20px 60px rgba(0,0,0,0.5);
-}
-
-.hero::after {
-  content: 'FRANCE';
-  position: absolute;
-  bottom: -4px;
-  right: 10px;
-  font-size: 72px;
-  font-weight: 900;
-  letter-spacing: -3px;
-  color: rgba(255,255,255,0.025);
-  pointer-events: none;
-  z-index: 0;
-  user-select: none;
-}
-
-.hero-orb {
-  position: absolute;
-  inset: -30%;
-  background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(99,102,241,0.22), transparent 70%);
-  animation: hero-pulse 6s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes hero-pulse {
-  0%,100% { transform: scale(1);    opacity: 1; }
-  50%      { transform: scale(1.08); opacity: 0.75; }
-}
-
-.hero-content { position: relative; z-index: 1; }
-
-.hero-eyebrow {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: rgba(148,163,184,0.7);
-  margin-bottom: 8px;
-}
-
-.hero-num {
-  font-size: 108px;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -8px;
-  background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 40%, #6366f1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 0 50px rgba(99,102,241,0.45));
-}
-
-.hero-sub {
-  font-size: 22px;
-  font-weight: 600;
-  color: rgba(148,163,184,0.85);
-  margin-top: 4px;
-  letter-spacing: -0.3px;
-}
-
-.hero-caption {
-  font-size: 13px;
-  color: rgba(100,116,139,0.9);
-  margin-top: 16px;
-}
-
-.hero-loc {
-  font-size: 30px;
-  font-weight: 800;
-  letter-spacing: -0.8px;
-  line-height: 1.1;
-  margin-bottom: 8px;
-}
-
-.hero-title {
-  font-size: 36px;
-  font-weight: 900;
-  letter-spacing: -1px;
-  background: linear-gradient(135deg, #f1f5f9, #94a3b8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* ── Section ─────────────────────────────────────────── */
@@ -344,20 +217,6 @@ body::before {
   background: rgba(99,102,241,0.12);
 }
 .btn--primary:hover { background: rgba(99,102,241,0.2); box-shadow: 0 0 20px rgba(99,102,241,0.15); }
-
-.btn--share {
-  font-size: 12px;
-  font-weight: 700;
-  color: #a5b4fc;
-  background: rgba(99,102,241,0.12);
-  border: 1px solid rgba(99,102,241,0.25);
-  padding: 6px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s;
-  letter-spacing: 0.1px;
-}
-.btn--share:hover { background: rgba(99,102,241,0.22); }
 
 .btn--ask {
   margin-top: 16px;
