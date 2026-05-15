@@ -7,8 +7,6 @@ export interface Day {
 export const TRIP_NAME = 'France 2026';
 
 export const TRIP: Day[] = [
-  { date: '2026-06-26', overnight: null },
-  { date: '2026-06-27', overnight: null },
   { date: '2026-06-28', overnight: 'Ferry – Irish Ferries' },
   { date: '2026-06-29', overnight: 'Anse Du Brick' },
   { date: '2026-06-30', overnight: 'Anse Du Brick' },
@@ -29,9 +27,6 @@ export const TRIP: Day[] = [
   { date: '2026-07-15', overnight: 'Granville' },
   { date: '2026-07-16', overnight: 'Granville' },
   { date: '2026-07-17', overnight: 'Ferry – Irish Ferries' },
-  { date: '2026-07-18', overnight: null },
-  { date: '2026-07-19', overnight: null },
-  { date: '2026-07-20', overnight: null },
 ];
 
 interface LocStyle { text: string; border: string }
