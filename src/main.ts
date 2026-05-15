@@ -1,4 +1,5 @@
 import './style.css';
+import { TRIP, TRIP_NAME, LOCATION_ADDRESSES, locStyle, type Day } from './data.js';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -6,26 +7,293 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-const app = document.getElementById('app')!;
-app.innerHTML = `
-  <div class="shell">
-    <header class="top-bar">
-      <span class="logo">✈️ Holiday Planner</span>
-    </header>
-    <main class="content">
-      <p class="placeholder">Your trips will appear here.</p>
-    </main>
-    <nav class="bottom-nav">
-      <button class="nav-btn active" data-tab="trips">Trips</button>
-      <button class="nav-btn" data-tab="explore">Explore</button>
-      <button class="nav-btn" data-tab="profile">Profile</button>
-    </nav>
-  </div>
-`;
+const DAY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as const;
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as const;
 
-document.querySelectorAll<HTMLButtonElement>('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+function todayISO(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function pad(n: number) { return String(n).padStart(2,'0'); }
+
+function fmt(iso: string): string {
+  const d = new Date(iso + 'T12:00:00');
+  return `${DAY[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`;
+}
+
+// ── Location groups ──────────────────────────────────────────────────────────
+
+interface LocGroup { name: string; start: string; end: string; nights: number; }
+
+function buildLocGroups(): LocGroup[] {
+  const groups: LocGroup[] = [];
+  let cur: LocGroup | null = null;
+  for (const day of TRIP) {
+    if (!day.overnight || day.tbd) { cur = null; continue; }
+    if (!cur || cur.name !== day.overnight) {
+      cur = { name: day.overnight, start: day.date, end: day.date, nights: 1 };
+      groups.push(cur);
+    } else { cur.end = day.date; cur.nights++; }
+  }
+  return groups;
+}
+
+function mapsUrl(name: string): string {
+  const addr = LOCATION_ADDRESSES[name] ?? name + ', France';
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}&travelmode=driving`;
+}
+
+// ── Hero ─────────────────────────────────────────────────────────────────────
+
+function buildHero(today: string): string {
+  const first = TRIP[0].date;
+  const last  = TRIP[TRIP.length - 1].date;
+
+  if (today < first) {
+    const ms   = new Date(first+'T00:00:00').getTime() - new Date(today+'T00:00:00').getTime();
+    const days = Math.ceil(ms / 86_400_000);
+    return `
+      <div class="hero">
+        <div class="hero-orb"></div>
+        <div class="hero-content">
+          <div class="hero-eyebrow">countdown</div>
+          <div class="hero-num">${days}</div>
+          <div class="hero-sub">days to go</div>
+          <div class="hero-caption">Departing ${fmt(first)}</div>
+        </div>
+      </div>`;
+  }
+
+  if (today > last) {
+    return `
+      <div class="hero hero--done">
+        <div class="hero-orb"></div>
+        <div class="hero-content">
+          <div class="hero-title">What a trip!</div>
+          <div class="hero-caption">${fmt(first)} – ${fmt(last)}</div>
+        </div>
+      </div>`;
+  }
+
+  const idx = TRIP.findIndex(d => d.date === today);
+  const day = TRIP[idx];
+  const loc = day.overnight ?? (day.tbd ? 'Nothing booked yet' : 'Travel day');
+  const col = day.overnight ? locStyle(day.overnight).text : '#94a3b8';
+  const glow = day.overnight ? locStyle(day.overnight).border : '#475569';
+
+  return `
+    <div class="hero" style="--loc-glow:${glow}40">
+      <div class="hero-orb" style="background:radial-gradient(ellipse,${glow}30,transparent 70%)"></div>
+      <div class="hero-content">
+        <div class="hero-eyebrow">Day ${idx+1} of ${TRIP.length} &middot; ${fmt(today)}</div>
+        <div class="hero-loc" style="color:${col};text-shadow:0 0 40px ${glow}80">${loc}</div>
+        <div class="hero-caption">Tonight's stop</div>
+      </div>
+    </div>`;
+}
+
+// ── Itinerary row ─────────────────────────────────────────────────────────────
+
+function buildRow(day: Day, isToday: boolean): string {
+  const d   = new Date(day.date+'T12:00:00');
+  const dn  = DAY[d.getDay()];
+  const num = d.getDate();
+  const mon = MON[d.getMonth()];
+
+  let badge: string;
+  let accentColor: string;
+
+  if (day.tbd) {
+    badge = `<span class="badge badge--tbd">Nothing booked</span>`;
+    accentColor = '#d97706';
+  } else if (day.overnight) {
+    const { text, border } = locStyle(day.overnight);
+    badge = `<span class="badge" style="color:${text};border-color:${border}40;background:${border}18">${day.overnight}</span>`;
+    accentColor = border;
+  } else {
+    badge = `<span class="badge badge--travel">Travel</span>`;
+    accentColor = '#1e293b';
+  }
+
+  const accentStyle = isToday ? '' : `style="--row-accent:${accentColor}"`;
+
+  return `
+    <div class="row${isToday ? ' row--today' : ''}" ${accentStyle}${isToday ? ' id="today-row"' : ''}>
+      <div class="row-accent"></div>
+      <div class="row-left">
+        <span class="row-day">${dn}</span>
+        <div class="row-dates">
+          ${isToday ? '<span class="today-tag">TODAY</span>' : ''}
+          <span class="row-date">${num} ${mon}</span>
+        </div>
+      </div>
+      ${badge}
+    </div>`;
+}
+
+// ── Location card ─────────────────────────────────────────────────────────────
+
+function buildLocCard(g: LocGroup, idx: number): string {
+  const { text, border } = locStyle(g.name);
+  const range  = g.start === g.end ? fmt(g.start) : `${fmt(g.start)} – ${fmt(g.end)}`;
+  const nights = g.nights === 1 ? '1 night' : `${g.nights} nights`;
+  const pid    = `panel-${idx}`;
+  const oid    = `output-${idx}`;
+
+  return `
+    <div class="loc-card" style="--loc-text:${text};--loc-border:${border}">
+      <div class="loc-stripe" style="background:linear-gradient(180deg,${text},${border})"></div>
+      <div class="loc-body">
+        <div class="loc-name">${g.name}</div>
+        <div class="loc-meta">${range} &middot; ${nights}</div>
+        <div class="loc-actions">
+          <a class="btn btn--outline" href="${mapsUrl(g.name)}" target="_blank" rel="noopener noreferrer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Directions
+          </a>
+          <button class="btn btn--primary" data-panel="${pid}" data-open="false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            Ask Claude
+          </button>
+        </div>
+        <div class="claude-panel" id="${pid}" hidden>
+          <div class="selector-row">
+            <span class="sel-label">What?</span>
+            <div class="pills" data-group="type">
+              <button class="pill active" data-val="food">Food</button>
+              <button class="pill" data-val="activities">Activities</button>
+              <button class="pill" data-val="food and activities">Both</button>
+            </div>
+          </div>
+          <div class="selector-row">
+            <span class="sel-label">How far?</span>
+            <div class="pills" data-group="dist">
+              <button class="pill active" data-val="walking distance">Walking</button>
+              <button class="pill" data-val="5 km">5 km</button>
+              <button class="pill" data-val="10 km">10 km</button>
+              <button class="pill" data-val="20 km">20 km</button>
+            </div>
+          </div>
+          <button class="btn btn--ask" data-loc="${g.name}" data-out="${oid}">Get Suggestions</button>
+          <div class="claude-output" id="${oid}" hidden></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+function render(): void {
+  const today  = todayISO();
+  const groups = buildLocGroups().filter(g => !g.name.includes('Ferry'));
+
+  document.getElementById('app')!.innerHTML = `
+    <div class="shell">
+      <header class="top-bar">
+        <div class="logo">
+          <span class="logo-main">${TRIP_NAME}</span>
+          <div class="tricolor"><span class="tc-b"></span><span class="tc-w"></span><span class="tc-r"></span></div>
+        </div>
+        <button class="btn btn--share" id="share-btn">Share</button>
+      </header>
+      <main class="content">
+        ${buildHero(today)}
+        <section class="section">
+          <div class="section-title">Itinerary</div>
+          <div class="list">
+            ${TRIP.map(d => buildRow(d, d.date === today)).join('')}
+          </div>
+        </section>
+        <section class="section">
+          <div class="section-title">Locations</div>
+          <div class="loc-list">
+            ${groups.map((g, i) => buildLocCard(g, i)).join('')}
+          </div>
+        </section>
+      </main>
+    </div>`;
+
+  wireEvents();
+}
+
+// ── Events ────────────────────────────────────────────────────────────────────
+
+function wireEvents(): void {
+
+  document.getElementById('share-btn')!.addEventListener('click', () => {
+    void (async () => {
+      if (navigator.share) {
+        await navigator.share({ title: TRIP_NAME, url: location.href });
+      } else {
+        await navigator.clipboard.writeText(location.href);
+        const btn = document.getElementById('share-btn')!;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Share'; }, 2000);
+      }
+    })();
   });
-});
+
+  document.querySelectorAll<HTMLButtonElement>('[data-panel]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const panel = document.getElementById(btn.dataset['panel']!)!;
+      const open  = btn.dataset['open'] === 'true';
+      panel.hidden       = open;
+      btn.dataset['open'] = String(!open);
+      btn.innerHTML = open
+        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg> Ask Claude`
+        : 'Close';
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('.pills').forEach(group => {
+    group.querySelectorAll<HTMLButtonElement>('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+      });
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('.btn--ask').forEach(btn => {
+    btn.addEventListener('click', () => {
+      void (async () => {
+        const loc    = btn.dataset['loc']!;
+        const outId  = btn.dataset['out']!;
+        const panel  = btn.closest<HTMLElement>('.claude-panel')!;
+        const type   = panel.querySelector<HTMLButtonElement>('[data-group="type"] .pill.active')!.dataset['val']!;
+        const dist   = panel.querySelector<HTMLButtonElement>('[data-group="dist"] .pill.active')!.dataset['val']!;
+        const output = document.getElementById(outId)!;
+
+        output.hidden      = false;
+        output.textContent = 'Asking Claude…';
+        btn.disabled       = true;
+
+        try {
+          const res = await fetch('/api/suggest', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ location: loc, type, distance: dist }),
+          });
+
+          if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+
+          const reader  = res.body.getReader();
+          const decoder = new TextDecoder();
+          output.textContent = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            output.textContent += decoder.decode(value, { stream: true });
+          }
+        } catch {
+          output.textContent = 'Could not load suggestions — check your connection and try again.';
+        } finally {
+          btn.disabled = false;
+        }
+      })();
+    });
+  });
+}
+
+render();

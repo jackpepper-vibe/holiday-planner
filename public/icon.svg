@@ -1,4 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#1e293b"/>
-  <text x="256" y="340" font-size="280" text-anchor="middle" font-family="Apple Color Emoji,Segoe UI Emoji,sans-serif">✈️</text>
+  <defs>
+    <clipPath id="cl"><rect width="512" height="512" rx="112" ry="112"/></clipPath>
+    <linearGradient id="ov" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
+    </linearGradient>
+  </defs>
+  <!-- French tricolor background -->
+  <g clip-path="url(#cl)">
+    <rect width="512" height="512" fill="#002395"/>
+    <rect x="171" y="0" width="170" height="512" fill="#F5F5F5"/>
+    <rect x="341" y="0" width="171" height="512" fill="#ED2939"/>
+    <!-- Depth overlay -->
+    <rect width="512" height="512" fill="url(#ov)"/>
+    <!-- Subtle dark vignette for depth -->
+    <rect width="512" height="512" fill="rgba(0,10,40,0.28)"/>
+  </g>
+  <!-- Plane silhouette (top-down view, pointing up) -->
+  <g transform="translate(256,248)" fill="white" opacity="0.97">
+    <!-- Fuselage -->
+    <ellipse cx="0" cy="0" rx="17" ry="88"/>
+    <!-- Main wings -->
+    <path d="M-17,-18 L-104,-2 L-104,24 L-17,9 Z"/>
+    <path d="M17,-18 L104,-2 L104,24 L17,9 Z"/>
+    <!-- Tail fins -->
+    <path d="M-17,54 L-58,80 L-58,91 L-17,70 Z"/>
+    <path d="M17,54 L58,80 L58,91 L17,70 Z"/>
+    <!-- Nose tip accent -->
+    <ellipse cx="0" cy="-85" rx="6" ry="8" fill="rgba(255,255,255,0.6)"/>
+  </g>
 </svg>
