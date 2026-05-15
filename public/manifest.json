@@ -1,6 +1,6 @@
 {
   "name": "Holiday Planner",
-  "short_name": "Holidays",
+  "short_name": "France 26",
   "description": "Plan and organise your trips",
   "start_url": "/",
   "display": "standalone",
@@ -8,6 +8,6 @@
   "theme_color": "#1a1a2e",
   "orientation": "portrait",
   "icons": [
-    { "src": "/icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "/Icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
