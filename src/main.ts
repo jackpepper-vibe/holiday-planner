@@ -38,6 +38,11 @@ function buildLocGroups(): LocGroup[] {
   return groups;
 }
 
+const FERRY_DETAIL: Record<string, string[]> = {
+  '2026-06-28': ['Depart Dublin 4:00pm', 'Arrive Cherbourg 11:30am Monday', '2 × 4 Bed cabins'],
+  '2026-07-17': ['Depart Cherbourg 4:30pm', 'Arrive Dublin 10:45am Saturday', '2 × 4 Bed cabins'],
+};
+
 const LOC_IMAGES: Record<string, string> = {
   'Anse Du Brick':   '/anse-du-brick.jpg',
   'Mané Guernéhué': '/camping-mane-guernehue.jpg',
@@ -74,6 +79,29 @@ function buildRow(day: Day, isToday: boolean): string {
   }
 
   const accentStyle = isToday ? '' : `style="--row-accent:${accentColor}"`;
+  const ferryDetail = FERRY_DETAIL[day.date];
+
+  if (ferryDetail) {
+    const { text, border } = locStyle(day.overnight!);
+    return `
+      <div class="row row--ferry row--link" ${accentStyle} data-ferry-row>
+        <div class="row-accent"></div>
+        <div class="row-main">
+          <div class="row-left">
+            <span class="row-day">${dn}</span>
+            <div class="row-dates"><span class="row-date">${num} ${mon}</span></div>
+          </div>
+          <div class="row-right">
+            <span class="badge" style="color:${text};border-color:${border}40;background:${border}18">${day.overnight}</span>
+            <svg class="ferry-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="ferry-detail" hidden>
+          ${ferryDetail.map(line => `<div class="ferry-item">${line}</div>`).join('')}
+        </div>
+      </div>`;
+  }
+
   const isLink = !!(day.overnight && !day.overnight.includes('Ferry'));
   const linkAttr = isLink ? ` data-scroll-to-loc="${day.overnight}"` : '';
 
@@ -200,6 +228,15 @@ function wireEvents(): void {
 
   document.querySelectorAll<HTMLButtonElement>('[data-go-page]').forEach(btn => {
     btn.addEventListener('click', () => goToPage(Number(btn.dataset['goPage'])));
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-ferry-row]').forEach(row => {
+    row.addEventListener('click', () => {
+      const detail = row.querySelector<HTMLElement>('.ferry-detail')!;
+      const open   = detail.hidden === true;
+      detail.hidden = !open;
+      row.classList.toggle('row--ferry-open', open);
+    });
   });
 
   document.querySelectorAll<HTMLElement>('[data-scroll-to-loc]').forEach(row => {
