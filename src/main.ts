@@ -165,8 +165,8 @@ function buildLocPage(g: LocGroup, pageIdx: number): string {
               <div class="pills" data-group="dist">
                 <button class="pill active" data-val="walking distance">Walking</button>
                 <button class="pill" data-val="5 km">5 km</button>
-                <button class="pill" data-val="10 km">10 km</button>
                 <button class="pill" data-val="20 km">20 km</button>
+                <button class="pill" data-val="50 km">50 km</button>
               </div>
             </div>
             <button class="btn btn--ask" data-loc="${g.name}" data-out="${oid}">Get Suggestions</button>
