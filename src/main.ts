@@ -38,6 +38,13 @@ function buildLocGroups(): LocGroup[] {
   return groups;
 }
 
+const LOC_IMAGES: Record<string, string> = {
+  'Anse Du Brick':   '/anse-du-brick.jpg',
+  'Mané Guernéhué': '/camping-mane-guernehue.jpg',
+  'Puy du Fou':      '/puy-du-foy.jpg',
+  'Granville':       '/granville.jpg',
+};
+
 function mapsUrl(name: string): string {
   const addr = LOCATION_ADDRESSES[name] ?? name + ', France';
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}&travelmode=driving`;
@@ -84,52 +91,60 @@ function buildRow(day: Day, isToday: boolean): string {
     </div>`;
 }
 
-// ── Location card ─────────────────────────────────────────────────────────────
+// ── Location page ─────────────────────────────────────────────────────────────
 
-function buildLocCard(g: LocGroup, idx: number): string {
+function buildLocPage(g: LocGroup, pageIdx: number): string {
   const { text, border } = locStyle(g.name);
   const range  = g.start === g.end ? fmt(g.start) : `${fmt(g.start)} – ${fmt(g.end)}`;
   const nights = g.nights === 1 ? '1 night' : `${g.nights} nights`;
-  const pid    = `panel-${idx}`;
-  const oid    = `output-${idx}`;
+  const oid    = `output-${pageIdx}`;
 
   return `
-    <div class="loc-card" style="--loc-text:${text};--loc-border:${border}">
-      <div class="loc-stripe" style="background:linear-gradient(180deg,${text},${border})"></div>
-      <div class="loc-body">
-        <div class="loc-name">${g.name}</div>
-        <div class="loc-meta">${range} &middot; ${nights}</div>
-        <div class="loc-actions">
-          <a class="btn btn--outline" href="${mapsUrl(g.name)}" target="_blank" rel="noopener noreferrer">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            Directions
-          </a>
-          <button class="btn btn--primary" data-panel="${pid}" data-open="false">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-            Ask Claude
+    <div class="page" data-loc-name="${g.name}">
+      <div class="shell">
+        <header class="top-bar top-bar--loc" style="border-bottom-color:${border}44">
+          <button class="back-btn" data-go-page="0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Back
           </button>
-        </div>
-        <div class="claude-panel" id="${pid}" hidden>
-          <div class="selector-row">
-            <span class="sel-label">What?</span>
-            <div class="pills" data-group="type">
-              <button class="pill active" data-val="food">Food</button>
-              <button class="pill" data-val="activities">Activities</button>
-              <button class="pill" data-val="food and activities">Both</button>
+          <span class="top-bar-loc" style="color:${text}">${g.name}</span>
+        </header>
+        <main class="content">
+          ${LOC_IMAGES[g.name] ? `<img src="${LOC_IMAGES[g.name]}" alt="${g.name}" class="loc-page-img" />` : ''}
+          <div class="loc-hero" style="border-color:${border}33">
+            <div class="loc-hero-stripe" style="background:linear-gradient(180deg,${text},${border})"></div>
+            <div class="loc-hero-body">
+              <div class="loc-hero-name" style="color:${text};text-shadow:0 0 40px ${border}60">${g.name}</div>
+              <div class="loc-hero-meta">${range} &middot; ${nights}</div>
+              <a class="btn btn--outline" href="${mapsUrl(g.name)}" target="_blank" rel="noopener noreferrer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                Directions
+              </a>
             </div>
           </div>
-          <div class="selector-row">
-            <span class="sel-label">How far?</span>
-            <div class="pills" data-group="dist">
-              <button class="pill active" data-val="walking distance">Walking</button>
-              <button class="pill" data-val="5 km">5 km</button>
-              <button class="pill" data-val="10 km">10 km</button>
-              <button class="pill" data-val="20 km">20 km</button>
+          <section>
+            <div class="section-title">Ask Claude</div>
+            <div class="selector-row">
+              <span class="sel-label">What?</span>
+              <div class="pills" data-group="type">
+                <button class="pill active" data-val="food">Food</button>
+                <button class="pill" data-val="activities">Activities</button>
+                <button class="pill" data-val="food and activities">Both</button>
+              </div>
             </div>
-          </div>
-          <button class="btn btn--ask" data-loc="${g.name}" data-out="${oid}">Get Suggestions</button>
-          <div class="claude-output" id="${oid}" hidden></div>
-        </div>
+            <div class="selector-row">
+              <span class="sel-label">How far?</span>
+              <div class="pills" data-group="dist">
+                <button class="pill active" data-val="walking distance">Walking</button>
+                <button class="pill" data-val="5 km">5 km</button>
+                <button class="pill" data-val="10 km">10 km</button>
+                <button class="pill" data-val="20 km">20 km</button>
+              </div>
+            </div>
+            <button class="btn btn--ask" data-loc="${g.name}" data-out="${oid}">Get Suggestions</button>
+            <div class="claude-output" id="${oid}" hidden></div>
+          </section>
+        </main>
       </div>
     </div>`;
 }
@@ -141,50 +156,38 @@ function render(): void {
   const groups = buildLocGroups().filter(g => !g.name.includes('Ferry'));
 
   document.getElementById('app')!.innerHTML = `
-    <div class="shell">
-      <header class="top-bar">
-        <img src="/header2.png" alt="France 2026" class="header-img" />
-      </header>
-      <main class="content">
-        <section class="section">
-          <div class="section-title">Itinerary</div>
-          <div class="list">
-            ${TRIP.map(d => buildRow(d, d.date === today)).join('')}
-          </div>
-        </section>
-        <section class="section" id="loc-section">
-          <div class="section-title">Locations</div>
-          <div class="loc-scroller" id="loc-scroller">
-            ${groups.map((g, i) => `
-              <div class="loc-page" data-loc-name="${g.name}">
-                ${buildLocCard(g, i)}
-              </div>`).join('')}
-          </div>
-          <div class="loc-dots" id="loc-dots">
-            ${groups.map((_, i) => `<span class="loc-dot${i === 0 ? ' loc-dot--active' : ''}"></span>`).join('')}
-          </div>
-        </section>
-      </main>
+    <div class="pages-wrap" id="pages-wrap">
+      <div class="page">
+        <div class="shell">
+          <header class="top-bar">
+            <img src="/header2.png" alt="France 2026" class="header-img" />
+          </header>
+          <main class="content">
+            <section class="section">
+              <div class="section-title">Itinerary</div>
+              <div class="list">
+                ${TRIP.map(d => buildRow(d, d.date === today)).join('')}
+              </div>
+            </section>
+          </main>
+        </div>
+      </div>
+      ${groups.map((g, i) => buildLocPage(g, i + 1)).join('')}
     </div>`;
 
   wireEvents();
 }
 
+// ── Navigation ────────────────────────────────────────────────────────────────
+
+function goToPage(idx: number): void {
+  const wrap = document.getElementById('pages-wrap')!;
+  wrap.scrollTo({ left: idx * wrap.clientWidth, behavior: 'smooth' });
+}
+
 // ── Events ────────────────────────────────────────────────────────────────────
 
 function wireEvents(): void {
-
-  document.querySelectorAll<HTMLButtonElement>('[data-panel]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const panel = document.getElementById(btn.dataset['panel']!)!;
-      const open  = btn.dataset['open'] === 'true';
-      panel.hidden       = open;
-      btn.dataset['open'] = String(!open);
-      btn.innerHTML = open
-        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg> Ask Claude`
-        : 'Close';
-    });
-  });
 
   document.querySelectorAll<HTMLElement>('.pills').forEach(group => {
     group.querySelectorAll<HTMLButtonElement>('.pill').forEach(pill => {
@@ -195,25 +198,16 @@ function wireEvents(): void {
     });
   });
 
-  // Carousel dot tracking
-  const scroller = document.getElementById('loc-scroller');
-  const dots = Array.from(document.querySelectorAll<HTMLElement>('.loc-dot'));
-  if (scroller && dots.length) {
-    scroller.addEventListener('scroll', () => {
-      const idx = Math.round(scroller.scrollLeft / scroller.clientWidth);
-      dots.forEach((d, i) => d.classList.toggle('loc-dot--active', i === idx));
-    }, { passive: true });
-  }
+  document.querySelectorAll<HTMLButtonElement>('[data-go-page]').forEach(btn => {
+    btn.addEventListener('click', () => goToPage(Number(btn.dataset['goPage'])));
+  });
 
-  // Row tap → navigate to location page
   document.querySelectorAll<HTMLElement>('[data-scroll-to-loc]').forEach(row => {
     row.addEventListener('click', () => {
       const locName = row.dataset['scrollToLoc'];
-      const pages = Array.from(document.querySelectorAll<HTMLElement>('.loc-page'));
-      const pageIdx = pages.findIndex(p => p.dataset['locName'] === locName);
-      if (pageIdx === -1 || !scroller) return;
-      document.getElementById('loc-section')!.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      scroller.scrollTo({ left: pageIdx * scroller.clientWidth, behavior: 'smooth' });
+      const allPages = Array.from(document.querySelectorAll<HTMLElement>('.page'));
+      const idx = allPages.findIndex(p => p.dataset['locName'] === locName);
+      if (idx !== -1) goToPage(idx);
     });
   });
 
@@ -222,9 +216,9 @@ function wireEvents(): void {
       void (async () => {
         const loc    = btn.dataset['loc']!;
         const outId  = btn.dataset['out']!;
-        const panel  = btn.closest<HTMLElement>('.claude-panel')!;
-        const type   = panel.querySelector<HTMLButtonElement>('[data-group="type"] .pill.active')!.dataset['val']!;
-        const dist   = panel.querySelector<HTMLButtonElement>('[data-group="dist"] .pill.active')!.dataset['val']!;
+        const page   = btn.closest<HTMLElement>('.page')!;
+        const type   = page.querySelector<HTMLButtonElement>('[data-group="type"] .pill.active')!.dataset['val']!;
+        const dist   = page.querySelector<HTMLButtonElement>('[data-group="dist"] .pill.active')!.dataset['val']!;
         const output = document.getElementById(outId)!;
 
         output.hidden      = false;
