@@ -67,9 +67,11 @@ function buildRow(day: Day, isToday: boolean): string {
   }
 
   const accentStyle = isToday ? '' : `style="--row-accent:${accentColor}"`;
+  const isLink = !!(day.overnight && !day.overnight.includes('Ferry'));
+  const linkAttr = isLink ? ` data-scroll-to-loc="${day.overnight}"` : '';
 
   return `
-    <div class="row${isToday ? ' row--today' : ''}" ${accentStyle}${isToday ? ' id="today-row"' : ''}>
+    <div class="row${isToday ? ' row--today' : ''}${isLink ? ' row--link' : ''}" ${accentStyle}${isToday ? ' id="today-row"' : ''}${linkAttr}>
       <div class="row-accent"></div>
       <div class="row-left">
         <span class="row-day">${dn}</span>
@@ -150,10 +152,16 @@ function render(): void {
             ${TRIP.map(d => buildRow(d, d.date === today)).join('')}
           </div>
         </section>
-        <section class="section">
+        <section class="section" id="loc-section">
           <div class="section-title">Locations</div>
-          <div class="loc-list">
-            ${groups.map((g, i) => buildLocCard(g, i)).join('')}
+          <div class="loc-scroller" id="loc-scroller">
+            ${groups.map((g, i) => `
+              <div class="loc-page" data-loc-name="${g.name}">
+                ${buildLocCard(g, i)}
+              </div>`).join('')}
+          </div>
+          <div class="loc-dots" id="loc-dots">
+            ${groups.map((_, i) => `<span class="loc-dot${i === 0 ? ' loc-dot--active' : ''}"></span>`).join('')}
           </div>
         </section>
       </main>
@@ -184,6 +192,28 @@ function wireEvents(): void {
         group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
       });
+    });
+  });
+
+  // Carousel dot tracking
+  const scroller = document.getElementById('loc-scroller');
+  const dots = Array.from(document.querySelectorAll<HTMLElement>('.loc-dot'));
+  if (scroller && dots.length) {
+    scroller.addEventListener('scroll', () => {
+      const idx = Math.round(scroller.scrollLeft / scroller.clientWidth);
+      dots.forEach((d, i) => d.classList.toggle('loc-dot--active', i === idx));
+    }, { passive: true });
+  }
+
+  // Row tap → navigate to location page
+  document.querySelectorAll<HTMLElement>('[data-scroll-to-loc]').forEach(row => {
+    row.addEventListener('click', () => {
+      const locName = row.dataset['scrollToLoc'];
+      const pages = Array.from(document.querySelectorAll<HTMLElement>('.loc-page'));
+      const pageIdx = pages.findIndex(p => p.dataset['locName'] === locName);
+      if (pageIdx === -1 || !scroller) return;
+      document.getElementById('loc-section')!.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      scroller.scrollTo({ left: pageIdx * scroller.clientWidth, behavior: 'smooth' });
     });
   });
 
