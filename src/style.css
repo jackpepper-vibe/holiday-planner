@@ -346,6 +346,7 @@ body::before {
   border-radius: 20px;
   overflow: hidden;
   display: flex;
+  flex-shrink: 0;
   box-shadow: 0 4px 30px rgba(0,0,0,0.3);
 }
 
@@ -366,6 +367,7 @@ body::before {
   display: block;
   border-radius: 18px;
   box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  flex-shrink: 0;
 }
 
 .loc-hero-name {
